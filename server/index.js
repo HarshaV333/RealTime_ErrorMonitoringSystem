@@ -27,13 +27,33 @@ app.post('/fail', async (req, res, next) => {
 
     } catch (error) {
         // console.log(error)
-        console.error(error);
-        return res.status(500).json({
-            success: false,
-            message: "post request failed",
-            Error: error.message
+        // console.error(error);
+        // return res.status(500).json({
+        //     success: false,
+        //     message: "post request failed",
+        //     Error: error.message
+        // })
+        next(error);
+    }
+})
+
+// post request coming from python to notify
+app.post('/internal/notify', (req, res, next) => {
+    try {
+        const {id, endpoint, method, severity, location, message} = req.body;
+        if(!id || !endpoint || !method || !severity || !location || !message){
+            return res.status(500).json({
+                success: false,
+                message: "Missing analysis data"
+            })
+        }
+        // TODO: write wesocket to directly update error to client
+        res.status(200).json({
+            success: true,
+            message: "Error Notified Successfully"
         })
-        // next(error);
+    } catch (error) {
+        
     }
 })
 
