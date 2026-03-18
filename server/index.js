@@ -19,20 +19,10 @@ app.post('/pass', (req, res) => {
 
 app.post('/fail', async (req, res, next) => {
     try {
-        // // console.log(req);
-        // // console.log(res);
-        // const {name, age} = req.body;
-        // const response = User.findById({_id: name});
-        throw new Error("Database connection Failure");
 
+        throw new Error("Database connection Failure");
+        
     } catch (error) {
-        // console.log(error)
-        // console.error(error);
-        // return res.status(500).json({
-        //     success: false,
-        //     message: "post request failed",
-        //     Error: error.message
-        // })
         next(error);
     }
 })
@@ -42,18 +32,19 @@ app.post('/internal/notify', (req, res, next) => {
     try {
         const {id, endpoint, method, severity, location, message} = req.body;
         if(!id || !endpoint || !method || !severity || !location || !message){
-            return res.status(500).json({
+            return res.status(400).json({
                 success: false,
-                message: "Missing analysis data"
+                message: "Missing analysis data from python worker"
             })
         }
-        // TODO: write wesocket to directly update error to client
+        // TODO: write websocket to directly update error to client
         res.status(200).json({
             success: true,
-            message: "Error Notified Successfully"
+            message: "Successfully sent Notification to client"
         })
     } catch (error) {
-        
+        console.log("error", error)
+        next(error)
     }
 })
 

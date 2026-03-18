@@ -28,6 +28,8 @@ def check_for_new_errors():
         # 1. fetch for errors that have not been analyzed at
         cursor.execute("SELECT * FROM error_logs WHERE status='new'")
         new_errors = cursor.fetchall()
+        # commiting bcoz it forces the transaction to close and refresh for next time
+        connection.commit()
         print("new errors ", new_errors)
 
         for error in new_errors:
@@ -50,27 +52,24 @@ def check_for_new_errors():
             print(analysis_results)
 
             # 4. Notify Node.js with internal api call
-            # try:
-            #     response = requests.post('http://localhost:3000/internal/notify', json=analysis_results)
-            #     if response.status_code == 200:
-            #         # 5. update DB status so that we don't process it again
-            #         cursor.execute("UPDATE error_logs SET status='analyzed' WHERE id=%s", error['id'])
-            #         connection.commit()
-            # except requests.exceptions.ConnectionError:
-            #     print("Node.js server is down, Cannot Notify")
-
-        # close the connection & cursor
-        cursor.close()
-        connection.close()
+            try:
+                response = requests.post('http://localhost:3000/internal/notify', json=analysis_results, timeout=5)
+                # print("response", response.status_code)
+                if response.status_code == 200:
+                    # 5. update DB status so that we don't process it again
+                    cursor.execute("UPDATE error_logs SET status='analyzed' WHERE id=%s", (error[0],))
+                    connection.commit()
+                else:
+                    print("Error updating DB status to analyzed")
+            except requests.exceptions.ConnectionError:
+                print("Node.js server is down, Cannot Notify")
 
     except Exception as e:
         print(f"Error connecting to MySQL: {e}")
 
 
 # loop to run every 10s
-# while True:
-#     print("Scanning for new errors")
-#     check_for_new_errors()
-#     time.sleep(10)
-
-check_for_new_errors()
+while True:
+    print("Scanning for new errors")
+    check_for_new_errors()
+    time.sleep(15)
