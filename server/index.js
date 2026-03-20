@@ -1,10 +1,35 @@
 const express = require('express');
-const app = express();
 const errorLogger = require('./middlewares/errorLogger');
+const {createServer} = require('http');
+const { Server } = require('socket.io');
+const cors = require('cors');
 
 require('dotenv').config();
 
+const app = express();
+// create a socket.io server
+const server = createServer(app);
+
+// 1. Initialize socket.io
+const io = new Server(server, {
+    cors:{
+        origin: process.env.client_url, // client url
+        methods: ["*"]
+    }
+});
+
+// 2. Attach io to app object so it's accessible in routes
+app.set('socketio', io)
+app.use(cors());
 app.use(express.json());
+// 3. Socket connection
+io.on('connection', (socket) => {
+    console.log("A dashboard client connected", socket.id);
+
+    socket.on('disconnect', () => {
+        console.log("Dashboard client disconnected")
+    })
+})
 
 app.get('/', (req, res) => {
     res.send(`<h1>Hello</h1>`)
@@ -37,7 +62,10 @@ app.post('/internal/notify', (req, res, next) => {
                 message: "Missing analysis data from python worker"
             })
         }
-        // TODO: write websocket to directly update error to client
+        // websocket to directly update error to client
+        req.app.get('socketio').emit('new_error', {
+            id, endpoint, method, severity, location, message
+        });
         res.status(200).json({
             success: true,
             message: "Successfully sent Notification to client"
@@ -50,6 +78,6 @@ app.post('/internal/notify', (req, res, next) => {
 
 app.use(errorLogger);
 
-app.listen(3000, () => {
-    console.log("server is running at PORT: 3000");
+server.listen(4000, () => {
+    console.log("server is running at PORT: 4000");
 })

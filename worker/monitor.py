@@ -2,6 +2,7 @@ from config.mysqlConnect import connection, cursor
 import re
 import time
 import requests
+import os
 
 # analyze the stack trace and assign a severity level
 def analyze_error_trace(error_trace):
@@ -9,7 +10,7 @@ def analyze_error_trace(error_trace):
     severity = "LOW"
     # Identify critical errors
     if any(word in error_trace for word in ["CONNECTION", "TIMEOUT", "DENIED", "MEMORY"]):
-        severity = "CRIRICAL"
+        severity = "CRITICAL"
     elif "ReferenceError" in error_trace or "TypeError" in error_trace:
         severity = "MEDIUM"
 
@@ -53,7 +54,7 @@ def check_for_new_errors():
 
             # 4. Notify Node.js with internal api call
             try:
-                response = requests.post('http://localhost:3000/internal/notify', json=analysis_results, timeout=5)
+                response = requests.post(f'{os.getenv("server_url")}/internal/notify', json=analysis_results, timeout=5)
                 # print("response", response.status_code)
                 if response.status_code == 200:
                     # 5. update DB status so that we don't process it again
