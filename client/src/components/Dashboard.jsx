@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import io from 'socket.io-client'
 
-const socket = io(process.env.SERVER_URL);
+const socket = io(process.env.REACT_APP_SERVER_URL);
 
 const Dashboard = () => {
   // --- MODEL (State Management) ---
@@ -107,13 +107,13 @@ const Dashboard = () => {
                     <td className="px-6 py-4 font-mono text-sm text-gray-300">
                       {log.endpoint}
                     </td>
-                    <td className="px-6 py-4 text-gray-500 text-sm italic">
+                    <td className="px-6 py-4 text-gray-300 text-sm italic">
                       {log.message}
                     </td>
-                    <td className="px-6 py-4 text-gray-500 text-sm italic">
+                    <td className="px-6 py-4 text-gray-300 text-sm italic">
                       {log.location}
                     </td>
-                    <td className="px-6 py-4 text-gray-500 text-xs font-mono">
+                    <td className="px-6 py-4 text-gray-300 text-xs font-mono">
                       {new Date().toLocaleTimeString()}
                     </td>
                   </tr>
