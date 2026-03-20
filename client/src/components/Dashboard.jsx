@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import io from 'socket.io-client'
 
-const socket = io('http://localhost:4000');
+const socket = io(process.env.SERVER_URL);
 
 const Dashboard = () => {
   // --- MODEL (State Management) ---
   const [errors, setErrors] = useState([]);
-  const [stats, setStats] = useState({ total: 0, critical: 0, medium: 0, low: 0 });
+  const [stats, setStats] = useState({ critical: 0, medium: 0, low: 0 });
   const [filter, setFilter] = useState('all');
 
   // --- CONTROLLER (Logic & Data Fetching) ---
@@ -18,7 +18,6 @@ const Dashboard = () => {
 
       // update the stats
       setStats((prev) => ({
-        total: prev.total + 1,
         critical: data.severity === 'CRITICAL' ? prev.critical + 1 : prev.critical,
         medium: data.severity === 'MEDIUM' ? prev.medium + 1 : prev.medium,
         low: data.severity === 'LOW' ? prev.low + 1 : prev.low,
@@ -29,7 +28,7 @@ const Dashboard = () => {
   }, []);
 
   const filteredLogs = errors.filter(log => 
-    filter === 'all' ? true : log.severity === filter
+    filter === 'all' ? true : log.severity.toLowerCase() === filter
   );
 
   // --- VIEW (UI Rendering) ---
@@ -88,7 +87,7 @@ const Dashboard = () => {
                 <th className="px-6 py-4 font-semibold">Endpoint</th>
                 <th className="px-6 py-4 font-semibold">Message</th>
                 <th className="px-6 py-4 font-semibold">Location</th>
-                {/* <th className="px-6 py-4 font-semibold">Time</th> */}
+                <th className="px-6 py-4 font-semibold">Time</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-800">
@@ -98,7 +97,7 @@ const Dashboard = () => {
                     <td className="px-6 py-4">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${
                         log.severity === 'CRITICAL' ? 'bg-red-500/10 text-red-500' :
-                        log.severity === 'MEDIUM' ? 'bg-yellow-500/10 text-orange-500' :
+                        log.severity === 'MEDIUM' ? 'bg-orange-500/10 text-orange-500' :
                         log.severity === 'LOW' ? 'bg-yellow-500/10 text-yellow-500' :
                         'bg-blue-500/10 text-blue-500'
                       }`}>
@@ -106,10 +105,13 @@ const Dashboard = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 font-mono text-sm text-gray-300">
+                      {log.endpoint}
+                    </td>
+                    <td className="px-6 py-4 text-gray-500 text-sm italic">
                       {log.message}
                     </td>
                     <td className="px-6 py-4 text-gray-500 text-sm italic">
-                      {log.location || 'system-core'}
+                      {log.location}
                     </td>
                     <td className="px-6 py-4 text-gray-500 text-xs font-mono">
                       {new Date().toLocaleTimeString()}
