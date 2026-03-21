@@ -114,7 +114,7 @@ const Dashboard = () => {
                       {log.location}
                     </td>
                     <td className="px-6 py-4 text-gray-300 text-xs font-mono">
-                      {new Date().toLocaleTimeString()}
+                      {log.error_time}
                     </td>
                   </tr>
                 ))

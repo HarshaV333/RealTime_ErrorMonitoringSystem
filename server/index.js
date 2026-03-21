@@ -55,8 +55,8 @@ app.post('/fail', async (req, res, next) => {
 // post request coming from python to notify
 app.post('/internal/notify', (req, res, next) => {
     try {
-        const {id, endpoint, method, severity, location, message} = req.body;
-        if(!id || !endpoint || !method || !severity || !location || !message){
+        const {id, endpoint, method, severity, location, message, error_time} = req.body;
+        if(!id || !endpoint || !method || !severity || !location || !message, !error_time){
             return res.status(400).json({
                 success: false,
                 message: "Missing analysis data from python worker"
@@ -64,7 +64,7 @@ app.post('/internal/notify', (req, res, next) => {
         }
         // websocket to directly update error to client
         req.app.get('socketio').emit('new_error', {
-            id, endpoint, method, severity, location, message
+            id, endpoint, method, severity, location, message, error_time
         });
         res.status(200).json({
             success: true,

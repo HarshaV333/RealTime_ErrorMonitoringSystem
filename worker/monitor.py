@@ -31,10 +31,10 @@ def check_for_new_errors():
         new_errors = cursor.fetchall()
         # commiting bcoz it forces the transaction to close and refresh for next time
         connection.commit()
-        print("new errors ", new_errors)
+        # print("new errors ", new_errors)
 
         for error in new_errors:
-            # print("error", error)
+            print("error", error)
             # print(error[4])
             # 2. analyze stack trace for each error
             # error[4] bcoz in error tuple we have error_trace at 4th index
@@ -48,7 +48,8 @@ def check_for_new_errors():
                 "method": error[2],
                 "severity": severity,
                 "location": location,
-                "message": error[3]
+                "message": error[3],
+                "error_time": error[7].isoformat()
             }
             print(analysis_results)
 
@@ -73,4 +74,4 @@ def check_for_new_errors():
 while True:
     print("Scanning for new errors")
     check_for_new_errors()
-    time.sleep(15)
+    time.sleep(10)
