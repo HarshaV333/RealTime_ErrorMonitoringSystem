@@ -9,7 +9,7 @@ def analyze_error_trace(error_trace):
     # analyzes the messy error string to find the file and assign a severity level
     severity = "LOW"
     # Identify critical errors
-    if any(word in error_trace for word in ["CONNECTION", "TIMEOUT", "DENIED", "MEMORY"]):
+    if any(word in error_trace for word in ["Connection", "Timeout", "Denied", "Memory"]):
         severity = "CRITICAL"
     elif "ReferenceError" in error_trace or "TypeError" in error_trace:
         severity = "MEDIUM"

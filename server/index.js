@@ -3,6 +3,7 @@ const errorLogger = require('./middlewares/errorLogger');
 const {createServer} = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
+const { TIMEOUT } = require('dns');
 
 require('dotenv').config();
 
@@ -42,11 +43,45 @@ app.post('/pass', (req, res) => {
     })
 })
 
+// simple error
 app.post('/fail', async (req, res, next) => {
     try {
 
         throw new Error("Database connection Failure");
         
+    } catch (error) {
+        next(error);
+    }
+});
+
+// reference error
+app.post('/refError', (req, res, next) => {
+    try {
+        throw new ReferenceError("UnIdentified Variable");
+    } catch (error) {
+        next(error);
+    }
+})
+
+// type error
+app.post('/typeError', (req, res, next) => {
+    try {
+        throw new TypeError("Wrong Type")
+    } catch (error) {
+        next(error)
+    }
+})
+
+//connection error
+app.post('/connError', async (req, res, next) => {
+    try {
+        const err = new Error("Connection failed: secondary service gateway timeout");
+  
+        // We mimic Node.js system error properties
+        err.name = "ConnectionTimeoutError";
+        err.code = "ETIMEDOUT";
+        err.status = 504;
+        next(err)
     } catch (error) {
         next(error);
     }

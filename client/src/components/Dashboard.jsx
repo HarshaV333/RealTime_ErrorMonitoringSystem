@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import io from 'socket.io-client'
+import {toast} from 'react-toastify'
 
 const socket = io(process.env.REACT_APP_SERVER_URL);
 
@@ -12,6 +13,9 @@ const Dashboard = () => {
   // --- CONTROLLER (Logic & Data Fetching) ---
   useEffect(() => {
     socket.on('new_error', (data) => {
+      toast.error("New Error Received", {
+        className: "bg-gray-900 text-gray-100"
+      })
       console.log("data", data)
       // add the new error to the top of the list
       setErrors((prev) => [data, ...prev]);
